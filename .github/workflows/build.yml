@@ -330,8 +330,7 @@ jobs:
       - run: ccache -s
       - run: ../tests/basic.sh out/Release/naive
         # No real or emulated environment is available to test this.
-        if: ${{ matrix.arch != 'arm64' }}
-        if: ${{ matrix.arch != 'x64' }}
+        if: ${{ matrix.arch != 'arm64' && matrix.arch != 'x64' }}
       - name: Pack naiveproxy assets
         run: |
           mkdir ${{ env.BUNDLE }}
