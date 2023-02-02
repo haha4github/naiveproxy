@@ -157,7 +157,7 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: hub release edit -a ${{ env.BUNDLE }}.tar.xz -m "" "${GITHUB_REF##*/}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELASE_TOKEN }}
   android:
     needs: cache-toolchains-posix
     runs-on: ubuntu-20.04
@@ -230,7 +230,7 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: hub release edit -a ${{ env.BUNDLE }}.tar.xz -m "" "${GITHUB_REF##*/}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELASE_TOKEN }}
   win:
     needs: cache-toolchains-win
     runs-on: windows-2019
@@ -294,7 +294,7 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: hub release edit -a ${{ env.BUNDLE }}.zip -m "" "${GITHUB_REF##*/}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELASE_TOKEN }}
   mac:
     needs: cache-toolchains-mac
     runs-on: macos-11
@@ -346,7 +346,7 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: hub release edit -a ${{ env.BUNDLE }}.tar.xz -m "" "${GITHUB_REF##*/}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELASE_TOKEN }}
   ios:
     needs: cache-toolchains-mac
     runs-on: macos-11
