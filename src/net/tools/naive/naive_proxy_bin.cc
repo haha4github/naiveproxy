@@ -338,7 +338,7 @@ bool ParseCommandLine(const CommandLine& cmdline, Params* params) {
 
   params->net_log_path = cmdline.log_net_log;
   params->ssl_key_path = cmdline.ssl_key_log_file;
-
+  params->no_verify = cmdline.no_verify;
   return true;
 }
 }  // namespace
