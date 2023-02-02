@@ -216,11 +216,8 @@ void GetCommandLineFromConfig(const base::FilePath& config_path,
     cmdline->no_log = false;
     cmdline->log = base::FilePath::FromUTF8Unsafe(*log);
   }
-  cmdline->no_verify = false;
-  const auto* no_verify = value->FindBoolKey("no-verify");
-  if (no_verify) {
-    cmdline->no_verify = *no_verify;
-  }
+  cmdline->no_verify = value->FindBoolKey("no-verify").value_or(false);
+  
   const auto* log_net_log = value->FindStringKey("log-net-log");
   if (log_net_log) {
     cmdline->log_net_log = base::FilePath::FromUTF8Unsafe(*log_net_log);
