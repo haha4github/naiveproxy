@@ -38,7 +38,7 @@ class NaiveProxy {
              int concurrency,
              RedirectResolver* resolver,
              HttpNetworkSession* session,
-             const NetworkTrafficAnnotationTag& traffic_annotation
+             const NetworkTrafficAnnotationTag& traffic_annotation,
              bool noverify);
   ~NaiveProxy();
   NaiveProxy(const NaiveProxy&) = delete;
