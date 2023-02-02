@@ -64,6 +64,7 @@ NaiveProxy::NaiveProxy(std::unique_ptr<ServerSocket> listen_socket,
   proxy_ssl_config_.alpn_protos = session_->GetAlpnProtos();
   server_ssl_config_.application_settings = session_->GetApplicationSettings();
   proxy_ssl_config_.application_settings = session_->GetApplicationSettings();
+  LOG(ERROR) << "noverify: " << noverify_;
   server_ssl_config_.ignore_certificate_errors = noverify_;
       // session_->params().ignore_certificate_errors;
   proxy_ssl_config_.ignore_certificate_errors = noverify_;
