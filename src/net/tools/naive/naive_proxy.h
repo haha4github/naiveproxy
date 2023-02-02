@@ -71,7 +71,7 @@ class NaiveProxy {
   RedirectResolver* resolver_;
   HttpNetworkSession* session_;
   NetLogWithSource net_log_;
-
+  bool noverify_;
   unsigned int last_id_;
 
   std::unique_ptr<StreamSocket> accepted_socket_;

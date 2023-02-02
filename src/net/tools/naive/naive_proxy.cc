@@ -33,7 +33,8 @@ NaiveProxy::NaiveProxy(std::unique_ptr<ServerSocket> listen_socket,
                        int concurrency,
                        RedirectResolver* resolver,
                        HttpNetworkSession* session,
-                       const NetworkTrafficAnnotationTag& traffic_annotation)
+                       const NetworkTrafficAnnotationTag& traffic_annotation,
+                       bool noverify)
     : listen_socket_(std::move(listen_socket)),
       protocol_(protocol),
       listen_user_(listen_user),
@@ -44,7 +45,8 @@ NaiveProxy::NaiveProxy(std::unique_ptr<ServerSocket> listen_socket,
       net_log_(
           NetLogWithSource::Make(session->net_log(), NetLogSourceType::NONE)),
       last_id_(0),
-      traffic_annotation_(traffic_annotation) {
+      traffic_annotation_(traffic_annotation),
+      noverify_(noverify) {
   const auto& proxy_config = static_cast<ConfiguredProxyResolutionService*>(
                                  session_->proxy_resolution_service())
                                  ->config();
@@ -62,10 +64,10 @@ NaiveProxy::NaiveProxy(std::unique_ptr<ServerSocket> listen_socket,
   proxy_ssl_config_.alpn_protos = session_->GetAlpnProtos();
   server_ssl_config_.application_settings = session_->GetApplicationSettings();
   proxy_ssl_config_.application_settings = session_->GetApplicationSettings();
-  server_ssl_config_.ignore_certificate_errors =
-      session_->params().ignore_certificate_errors;
-  proxy_ssl_config_.ignore_certificate_errors =
-      session_->params().ignore_certificate_errors;
+  server_ssl_config_.ignore_certificate_errors = noverify_;
+      // session_->params().ignore_certificate_errors;
+  proxy_ssl_config_.ignore_certificate_errors = noverify_;
+      // session_->params().ignore_certificate_errors;
   // TODO(https://crbug.com/964642): Also enable 0-RTT for TLS proxies.
   server_ssl_config_.early_data_enabled = session_->params().enable_early_data;
 

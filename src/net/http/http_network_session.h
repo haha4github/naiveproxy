@@ -94,7 +94,7 @@ struct NET_EXPORT HttpNetworkSessionParams {
 
   bool enable_server_push_cancellation = false;
   HostMappingRules host_mapping_rules;
-  bool ignore_certificate_errors = true;
+  bool ignore_certificate_errors = false;
   uint16_t testing_fixed_http_port = 0;
   uint16_t testing_fixed_https_port = 0;
   bool enable_user_alternate_protocol_ports = false;

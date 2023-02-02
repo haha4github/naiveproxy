@@ -90,6 +90,7 @@ struct CommandLine {
   std::string host_resolver_rules;
   std::string resolver_range;
   bool no_log;
+  bool no_verify;
   base::FilePath log;
   base::FilePath log_net_log;
   base::FilePath ssl_key_log_file;
@@ -112,6 +113,7 @@ struct Params {
   logging::LoggingSettings log_settings;
   base::FilePath net_log_path;
   base::FilePath ssl_key_path;
+  bool no_verify;
 };
 
 std::unique_ptr<base::Value> GetConstants() {
@@ -139,6 +141,7 @@ void GetCommandLine(const base::CommandLine& proc, CommandLine* cmdline) {
                  "--proxy=<proto>://[<user>:<pass>@]<hostname>[:<port>]\n"
                  "                           proto: https, quic\n"
                  "--insecure-concurrency=<N> Use N connections, insecure\n"
+                 "--no-verify                Do not verify the certification, insecure\n"
                  "--extra-headers=...        Extra headers split by CRLF\n"
                  "--host-resolver-rules=...  Resolver rules\n"
                  "--resolver-range=...       Redirect resolver range\n"
@@ -162,6 +165,7 @@ void GetCommandLine(const base::CommandLine& proc, CommandLine* cmdline) {
       proc.GetSwitchValueASCII("host-resolver-rules");
   cmdline->resolver_range = proc.GetSwitchValueASCII("resolver-range");
   cmdline->no_log = !proc.HasSwitch("log");
+  cmdline->no_verify = proc.HasSwitch("no-verify");
   cmdline->log = proc.GetSwitchValuePath("log");
   cmdline->log_net_log = proc.GetSwitchValuePath("log-net-log");
   cmdline->ssl_key_log_file = proc.GetSwitchValuePath("ssl-key-log-file");
@@ -212,6 +216,8 @@ void GetCommandLineFromConfig(const base::FilePath& config_path,
     cmdline->no_log = false;
     cmdline->log = base::FilePath::FromUTF8Unsafe(*log);
   }
+  cmdline->no_verify = false;
+  cmdline->no_verify = value->FindBoolKey("no-verify");
   const auto* log_net_log = value->FindStringKey("log-net-log");
   if (log_net_log) {
     cmdline->log_net_log = base::FilePath::FromUTF8Unsafe(*log_net_log);
@@ -587,7 +593,7 @@ int main(int argc, char* argv[]) {
   net::NaiveProxy naive_proxy(std::move(listen_socket), params.protocol,
                               params.listen_user, params.listen_pass,
                               params.concurrency, resolver.get(), session,
-                              kTrafficAnnotation);
+                              kTrafficAnnotation,params.no_verify);
 
   base::RunLoop().Run();
 

@@ -105,7 +105,7 @@ struct NET_EXPORT SSLConfig {
   std::vector<CertAndStatus> allowed_bad_certs;
 
   // True if all certificate errors should be ignored.
-  bool ignore_certificate_errors = true;
+  bool ignore_certificate_errors = false;
 
   // True if, for a single connection, any dependent network fetches should
   // be disabled. This can be used to avoid triggering re-entrancy in the
