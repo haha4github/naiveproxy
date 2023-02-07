@@ -1770,6 +1770,7 @@ executable("naive") {
 }
 
 static_library("libnaive") {
+  complete_static_lib = true
   sources = [
     "tools/naive/naive_connection.cc",
     "tools/naive/naive_connection.h",
