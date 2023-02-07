@@ -383,7 +383,7 @@ jobs:
       - name: Pack naiveproxy assets
         run: |
           mkdir ${{ env.BUNDLE }}
-          cp out/Release/naive config.json ../LICENSE ../USAGE.txt ${{ env.BUNDLE }}
+          cp out/Release/libnaive.so out/Release/naive config.json ../LICENSE ../USAGE.txt ${{ env.BUNDLE }}
           tar cJf ${{ env.BUNDLE }}.tar.xz ${{ env.BUNDLE }}
           openssl sha256 out/Release/naive >sha256sum.txt
           echo "SHA256SUM=$(cut -d' ' -f2 sha256sum.txt)" >>$GITHUB_ENV
@@ -395,4 +395,4 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: hub release edit -a ${{ env.BUNDLE }}.tar.xz -m "" "${GITHUB_REF##*/}"
         env:
-          GITHUB_TOKEN: ${{ secrets.RELASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELASE_TOKEN }} 
