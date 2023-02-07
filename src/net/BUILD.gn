@@ -1769,7 +1769,7 @@ executable("naive") {
   }
 }
 
-shared_library("libnaive") {
+static_library("libnaive") {
   sources = [
     "tools/naive/naive_connection.cc",
     "tools/naive/naive_connection.h",
