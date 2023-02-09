@@ -3,4 +3,4 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-void naive_run(const char* path);
+int naive_run(const char* path);

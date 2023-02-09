@@ -601,7 +601,7 @@ int main(int argc, char* argv[]) {
 }
 
 
-void naive_run(const char* path){
+int naive_run(const char* path){
   naive_partition_alloc_support::ReconfigureEarly();
 
   url::AddStandardScheme("quic",
