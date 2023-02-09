@@ -189,7 +189,7 @@ def DownloadAndUnpackPackage(package_file,
                              output_dir,
                              host_os,
                              version=PACKAGE_VERSION):
-  cds_file = "%s-%s.tar.xz" % (package_file, version)
+  cds_file = "%s-%s.tgz" % (package_file, version)
   cds_full_url = GetPlatformUrlPrefix(host_os) + cds_file
   try:
     DownloadAndUnpack(cds_full_url, output_dir)
@@ -201,7 +201,7 @@ def DownloadAndUnpackPackage(package_file,
 
 
 def DownloadAndUnpackClangMacRuntime(output_dir):
-  cds_file = "clang-%s.tar.xz" % PACKAGE_VERSION
+  cds_file = "clang-%s.tgz" % PACKAGE_VERSION
   # We run this only for the runtime libraries, and 'mac' and 'mac-arm64' both
   # have the same (universal) runtime libraries. It doesn't matter which one
   # we download here.
@@ -220,7 +220,7 @@ def DownloadAndUnpackClangMacRuntime(output_dir):
 
 # TODO(hans): Create a clang-win-runtime package instead.
 def DownloadAndUnpackClangWinRuntime(output_dir):
-  cds_file = "clang-%s.tar.xz" % PACKAGE_VERSION
+  cds_file = "clang-%s.tgz" % PACKAGE_VERSION
   cds_full_url = GetPlatformUrlPrefix('win') + cds_file
   path_prefixes = [
       'lib/clang/' + RELEASE_VERSION + '/lib/windows', 'bin/llvm-symbolizer.exe'
