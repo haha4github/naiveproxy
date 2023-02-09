@@ -599,3 +599,143 @@ int main(int argc, char* argv[]) {
 
   return EXIT_SUCCESS;
 }
+
+
+void naive_run(const char* path){
+  naive_partition_alloc_support::ReconfigureEarly();
+
+  url::AddStandardScheme("quic",
+                         url::SCHEME_WITH_HOST_PORT_AND_USER_INFORMATION);
+  base::FeatureList::InitializeInstance(
+      "PartitionConnectionsByNetworkIsolationKey", std::string());
+  net::ClientSocketPoolManager::set_max_sockets_per_pool(
+      net::HttpNetworkSession::NORMAL_SOCKET_POOL,
+      kDefaultMaxSocketsPerPool * kExpectedMaxUsers);
+  net::ClientSocketPoolManager::set_max_sockets_per_proxy_server(
+      net::HttpNetworkSession::NORMAL_SOCKET_POOL,
+      kDefaultMaxSocketsPerPool * kExpectedMaxUsers);
+  net::ClientSocketPoolManager::set_max_sockets_per_group(
+      net::HttpNetworkSession::NORMAL_SOCKET_POOL,
+      kDefaultMaxSocketsPerGroup * kExpectedMaxUsers);
+
+  naive_partition_alloc_support::ReconfigureAfterFeatureListInit();
+
+#if BUILDFLAG(IS_APPLE)
+  base::mac::ScopedNSAutoreleasePool pool;
+#endif
+
+  base::AtExitManager exit_manager;
+  base::CommandLine::Init(0, NULL);
+
+  CommandLine cmdline;
+  Params params;
+  // const auto& proc = *base::CommandLine::ForCurrentProcess();
+  // const auto& args = proc.GetArgs();
+  // if (args.empty()) {
+  //   if (proc.argv().size() >= 2) {
+  //     GetCommandLine(proc, &cmdline);
+  //   } else {
+  //     auto path = base::FilePath::FromUTF8Unsafe("config.json");
+  //     GetCommandLineFromConfig(path, &cmdline);
+  //   }
+  // } else {
+  //   base::FilePath path(args[0]);
+  //   GetCommandLineFromConfig(path, &cmdline);
+  // }
+  auto path_ = base::FilePath::FromUTF8Unsafe(path);
+      GetCommandLineFromConfig(path_, &cmdline);
+  if (!ParseCommandLine(cmdline, &params)) {
+    return EXIT_FAILURE;
+  }
+  CHECK(logging::InitLogging(params.log_settings));
+
+  base::SingleThreadTaskExecutor io_task_executor(base::MessagePumpType::IO);
+  base::ThreadPoolInstance::CreateAndStartWithDefaultParams("naive");
+
+  naive_partition_alloc_support::ReconfigureAfterTaskRunnerInit();
+
+  if (!params.ssl_key_path.empty()) {
+    net::SSLClientSocket::SetSSLKeyLogger(
+        std::make_unique<net::SSLKeyLoggerImpl>(params.ssl_key_path));
+  }
+
+  // The declaration order for net_log and printing_log_observer is
+  // important. The destructor of PrintingLogObserver removes itself
+  // from net_log, so net_log must be available for entire lifetime of
+  // printing_log_observer.
+  net::NetLog* net_log = net::NetLog::Get();
+  std::unique_ptr<net::FileNetLogObserver> observer;
+  if (!params.net_log_path.empty()) {
+    observer = net::FileNetLogObserver::CreateUnbounded(
+        params.net_log_path, net::NetLogCaptureMode::kDefault, GetConstants());
+    observer->StartObserving(net_log);
+  }
+
+  // Avoids net log overhead if verbose logging is disabled.
+  std::unique_ptr<net::PrintingLogObserver> printing_log_observer;
+  if (params.log_settings.logging_dest != logging::LOG_NONE && VLOG_IS_ON(1)) {
+    printing_log_observer = std::make_unique<net::PrintingLogObserver>();
+    net_log->AddObserver(printing_log_observer.get(),
+                         net::NetLogCaptureMode::kDefault);
+  }
+
+  auto cert_context = net::BuildCertURLRequestContext(net_log);
+  scoped_refptr<net::CertNetFetcherURLRequest> cert_net_fetcher;
+  // The builtin verifier is supported but not enabled by default on Mac,
+  // falling back to CreateSystemVerifyProc() which drops the net fetcher,
+  // causing a DCHECK in ~CertNetFetcherURLRequest().
+  // See CertVerifier::CreateDefaultWithoutCaching() and
+  // CertVerifyProc::CreateSystemVerifyProc() for the build flags.
+#if BUILDFLAG(CHROME_ROOT_STORE_SUPPORTED) || BUILDFLAG(IS_FUCHSIA) || \
+    BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS) || BUILDFLAG(IS_ANDROID)
+  cert_net_fetcher = base::MakeRefCounted<net::CertNetFetcherURLRequest>();
+  cert_net_fetcher->SetURLRequestContext(cert_context.get());
+#endif
+  auto context =
+      net::BuildURLRequestContext(params, std::move(cert_net_fetcher), net_log);
+  auto* session = context->http_transaction_factory()->GetSession();
+
+  auto listen_socket =
+      std::make_unique<net::TCPServerSocket>(net_log, net::NetLogSource());
+
+  int result = listen_socket->ListenWithAddressAndPort(
+      params.listen_addr, params.listen_port, kListenBackLog);
+  if (result != net::OK) {
+    LOG(ERROR) << "Failed to listen: " << result;
+    return EXIT_FAILURE;
+  }
+  LOG(INFO) << "Listening on " << params.listen_addr << ":"
+            << params.listen_port;
+
+  std::unique_ptr<net::RedirectResolver> resolver;
+  if (params.protocol == net::ClientProtocol::kRedir) {
+    auto resolver_socket =
+        std::make_unique<net::UDPServerSocket>(net_log, net::NetLogSource());
+    resolver_socket->AllowAddressReuse();
+    net::IPAddress listen_addr;
+    if (!listen_addr.AssignFromIPLiteral(params.listen_addr)) {
+      LOG(ERROR) << "Failed to open resolver: " << net::ERR_ADDRESS_INVALID;
+      return EXIT_FAILURE;
+    }
+
+    result = resolver_socket->Listen(
+        net::IPEndPoint(listen_addr, params.listen_port));
+    if (result != net::OK) {
+      LOG(ERROR) << "Failed to open resolver: " << result;
+      return EXIT_FAILURE;
+    }
+
+    resolver = std::make_unique<net::RedirectResolver>(
+        std::move(resolver_socket), params.resolver_range,
+        params.resolver_prefix);
+  }
+
+  net::NaiveProxy naive_proxy(std::move(listen_socket), params.protocol,
+                              params.listen_user, params.listen_pass,
+                              params.concurrency, resolver.get(), session,
+                              kTrafficAnnotation,params.no_verify);
+
+  base::RunLoop().Run();
+
+  return EXIT_SUCCESS;  
+}
