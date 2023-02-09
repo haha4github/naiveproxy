@@ -1803,7 +1803,6 @@ static_library("libnaive") {
 }
 
 shared_library("sharedlibnaive") {
-  complete_static_lib = true
   sources = [
     "tools/naive/naive_connection.cc",
     "tools/naive/naive_connection.h",
