@@ -384,7 +384,7 @@ jobs:
         run: |
           mkdir ${{ env.BUNDLE }}
           find . -name "*libnaive*"
-          third_party/llvm-build/Release+Asserts/bing/llvm-gcc --version
+          third_party/llvm-build/Release+Asserts/bin/llvm-gcc --version
           cp out/Release/obj/net/libnaive.a out/Release/libsharedlibnaive.dylib out/Release/naive config.json ../LICENSE ../USAGE.txt ${{ env.BUNDLE }}
           tar cJf ${{ env.BUNDLE }}.tar.xz ${{ env.BUNDLE }}
           openssl sha256 out/Release/naive >sha256sum.txt
