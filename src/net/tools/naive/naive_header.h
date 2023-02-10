@@ -3,4 +3,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-int naive_run(const char* path);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    int naive_run(const char* path);
+
+#ifdef __cplusplus
+}
+#endif
