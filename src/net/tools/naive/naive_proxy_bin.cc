@@ -68,6 +68,7 @@
 #include "url/gurl.h"
 #include "url/scheme_host_port.h"
 #include "url/url_util.h"
+#include "naive_header.h"
 
 #if BUILDFLAG(IS_APPLE)
 #include "base/mac/scoped_nsautorelease_pool.h"

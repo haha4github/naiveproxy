@@ -429,8 +429,8 @@ config("compiler") {
     # faster.
     # On arm64, this is already the default behavior.
     if (current_cpu == "x64") {
-      asmflags += [ "-femit-dwarf-unwind=no-compact-unwind" ]
-      cflags += [ "-femit-dwarf-unwind=no-compact-unwind" ]
+      #asmflags += [ "-femit-dwarf-unwind=no-compact-unwind" ]
+      #cflags += [ "-femit-dwarf-unwind=no-compact-unwind" ]
     }
   }
 
@@ -544,8 +544,8 @@ config("compiler") {
     # TODO(hans): Remove this once Clang generates better optimized debug info
     # by default. https://crbug.com/765793
     cflags += [
-      "-mllvm",
-      "-instcombine-lower-dbg-declare=0",
+      #"-mllvm",
+      #"-instcombine-lower-dbg-declare=0",
     ]
     if (!is_debug && use_thin_lto && is_a_target_toolchain) {
       if (is_win) {
@@ -559,7 +559,7 @@ config("compiler") {
     if (is_win) {
       cflags += [ "/clang:-ffp-contract=off" ]
     } else {
-      cflags += [ "-ffp-contract=off" ]
+      #cflags += [ "-ffp-contract=off" ]
     }
   }
 
@@ -1620,7 +1620,7 @@ config("default_warnings") {
       if (!is_nacl) {
         cflags += [
           # TODO(crbug.com/1343975) Evaluate and possibly enable.
-          "-Wno-deprecated-builtins",
+          #"-Wno-deprecated-builtins",
 
           # TODO(crbug.com/1352183) Evaluate and possibly enable.
           "-Wno-bitfield-constant-conversion",
