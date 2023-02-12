@@ -27,7 +27,7 @@ declare_args() {
   # Builds libcxx Natvis into the symbols for type visualization.
   # Set to false to workaround http://crbug.com/966676 and
   # http://crbug.com/966687.
-  libcxx_natvis_include = true
+  libcxx_natvis_include = false
 
   # When set, enables libc++ debug mode with iterator debugging.
   #

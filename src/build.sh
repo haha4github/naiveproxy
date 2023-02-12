@@ -79,4 +79,4 @@ export DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
 ./gn/out/gn gen "$out" --args="$flags $EXTRA_FLAGS" --script-executable=$PYTHON
 
-ninja -C "$out" naive libnaive sharedlibnaive
+ninja -C "$out" naive libnaive libmyc++ libmyc++abi
